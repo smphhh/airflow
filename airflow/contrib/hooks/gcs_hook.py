@@ -40,8 +40,8 @@ class GoogleCloudStorageHook(GoogleCloudBaseHook):
         """
         Returns a Google Cloud Storage service object.
         """
-        http_authorized = self._authorize()
-        return build('storage', 'v1', http=http_authorized)
+        credentials = self._get_credentials()
+        return build('storage', 'v1', credentials=credentials)
 
     # pylint:disable=redefined-builtin
     def download(self, bucket, object, filename=False):

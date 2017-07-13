@@ -130,8 +130,8 @@ class DataFlowHook(GoogleCloudBaseHook):
         """
         Returns a Google Cloud Storage service object.
         """
-        http_authorized = self._authorize()
-        return build('dataflow', 'v1b3', http=http_authorized)
+        credentials = self._get_credentials()
+        return build('dataflow', 'v1b3', credentials=credentials)
 
     def _start_dataflow(self, task_id, variables, dataflow, name, command_prefix):
         cmd = command_prefix + self._build_cmd(task_id, variables, dataflow)

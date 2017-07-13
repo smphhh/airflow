@@ -146,8 +146,9 @@ class DataProcHook(GoogleCloudBaseHook):
         """
         Returns a Google Cloud DataProc service object.
         """
-        http_authorized = self._authorize()
-        return build('dataproc', 'v1', http=http_authorized)
+        credentials = self._get_credentials()
+        return build('dataproc', 'v1', credentials=credentials)
+    
 
     def submit(self, project_id, job):
         submitted = _DataProcJob(self.get_conn(), project_id, job)

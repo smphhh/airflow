@@ -57,9 +57,9 @@ class GoogleCloudBaseHook(BaseHook):
         self.delegate_to = delegate_to
         self.extras = self.get_connection(conn_id).extra_dejson
 
-    def _authorize(self):
+    def _get_credentials(self):
         """
-        Returns an authorized HTTP object to be used to build a Google cloud
+        Returns OAuth credentials to be used to build a Google cloud
         service hook connection.
         """
         key_path = self._get_field('key_path', False)
@@ -87,6 +87,14 @@ class GoogleCloudBaseHook(BaseHook):
             else:
                 raise AirflowException('Unrecognised extension for key file.')
 
+        return credentials
+
+    def _authorize(self):
+        """
+        Returns an authorized HTTP object to be used to build a Google cloud
+        service hook connection.
+        """
+        credentials = self._get_credentials()
         http = httplib2.Http()
         return credentials.authorize(http)
 

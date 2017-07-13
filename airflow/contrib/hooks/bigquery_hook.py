@@ -63,8 +63,8 @@ class BigQueryHook(GoogleCloudBaseHook, DbApiHook):
         """
         Returns a BigQuery service object.
         """
-        http_authorized = self._authorize()
-        return build('bigquery', 'v2', http=http_authorized)
+        credentials = self._get_credentials()
+        return build('bigquery', 'v2', credentials=credentials)
 
     def insert_rows(self, table, rows, target_fields=None, commit_every=1000):
         """
