@@ -3690,9 +3690,8 @@ class DAG(BaseDag, LoggingMixin):
     def owner(self):
         return ", ".join(list(set([t.owner for t in self.tasks])))
 
-    @property
     @provide_session
-    def concurrency_reached(self, session=None):
+    def check_concurrency_reached(self, session=None):
         """
         Returns a boolean indicating whether the concurrency limit for this DAG
         has been reached
@@ -3703,6 +3702,15 @@ class DAG(BaseDag, LoggingMixin):
             TI.state == State.RUNNING,
         )
         return qry.scalar() >= self.concurrency
+
+    @property
+    @provide_session
+    def concurrency_reached(self, session=None):
+        """
+        Returns a boolean indicating whether the concurrency limit for this DAG
+        has been reached
+        """
+        return self.check_concurrency_reached(session)
 
     @property
     @provide_session
