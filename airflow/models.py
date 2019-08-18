@@ -418,6 +418,9 @@ class DagBag(BaseDagBag, LoggingMixin):
 
         for m in mods:
             for dag in list(m.__dict__.values()):
+                if isinstance(dag, LazyDAG):
+                    dag = dag.get_dag()
+
                 if isinstance(dag, DAG):
                     if not dag.full_filepath:
                         dag.full_filepath = filepath
@@ -4422,6 +4425,14 @@ class DAG(BaseDag, LoggingMixin):
                 self._test_cycle_helper(visit_map, descendant_id)
 
         visit_map[task_id] = DagBag.CYCLE_DONE
+
+
+class LazyDAG(object):
+    def __init__(self, dag_factory):
+        self._dag_factory = dag_factory
+
+    def get_dag(self):
+        return self._dag_factory()
 
 
 class Chart(Base):
