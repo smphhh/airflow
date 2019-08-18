@@ -77,12 +77,12 @@ def create_app(config=None, testing=False):
             app,
             name='Airflow',
             static_url_path='/admin',
-            index_view=views.HomeView(dagbag=dagbag, endpoint='', url='/admin', name="DAGs"),
+            index_view=views.HomeView(dagbag, endpoint='', url='/admin', name="DAGs"),
             template_mode='bootstrap3',
         )
         av = admin.add_view
         vs = views
-        av(vs.Airflow(dagbag=dagbag, name='DAGs', category='DAGs'))
+        av(vs.Airflow(dagbag, name='DAGs', category='DAGs'))
 
         if not conf.getboolean('core', 'secure_mode'):
             av(vs.QueryView(name='Ad Hoc Query', category="Data Profiling"))
@@ -94,8 +94,8 @@ def create_app(config=None, testing=False):
         av(vs.SlaMissModelView(
             models.SlaMiss,
             Session, name="SLA Misses", category="Browse"))
-        av(vs.TaskInstanceModelView(models.TaskInstance,
-            Session, dagbag=dagbag, name="Task Instances", category="Browse"))
+        av(vs.TaskInstanceModelView(dagbag, models.TaskInstance,
+            Session, name="Task Instances", category="Browse"))
         av(vs.LogModelView(
             models.Log, Session, name="Logs", category="Browse"))
         av(vs.JobModelView(

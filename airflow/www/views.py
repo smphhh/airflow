@@ -369,7 +369,7 @@ def get_date_time_num_runs_dag_runs_form_data(request, session, dag):
     }
 
 class Airflow(BaseView):
-    def __init__(self, *args, dagbag, **kwargs):
+    def __init__(self, dagbag, *args, **kwargs):
         super(Airflow, self).__init__(*args, **kwargs)
 
         self.dagbag = dagbag
@@ -1950,7 +1950,7 @@ class Airflow(BaseView):
 
 
 class HomeView(AdminIndexView):
-    def __init__(self, *args, dagbag, **kwargs):
+    def __init__(self, dagbag, *args, **kwargs):
         super(HomeView, self).__init__(*args, **kwargs)
 
         self.dagbag = dagbag
@@ -2681,7 +2681,7 @@ class TaskInstanceModelView(ModelViewOnly):
         'pool', 'log_url')
     page_size = PAGE_SIZE
 
-    def __init__(self, *args, dagbag, **kwargs):
+    def __init__(self, dagbag, *args, **kwargs):
         super(TaskInstanceModelView, self).__init__(*args, **kwargs)
 
         self.dagbag = dagbag
