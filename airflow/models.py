@@ -419,12 +419,15 @@ class DagBag(BaseDagBag, LoggingMixin):
         for m in mods:
             for dag in list(m.__dict__.values()):
                 if isinstance(dag, LazyDAG):
+                    is_lazydag = True
                     dag = dag.get_dag()
+                else:
+                    is_lazydag = False
 
                 if isinstance(dag, DAG):
                     if not dag.full_filepath:
                         dag.full_filepath = filepath
-                        if dag.fileloc != filepath and not is_zipfile:
+                        if dag.fileloc != filepath and not (is_zipfile or is_lazydag):
                             dag.fileloc = filepath
                     try:
                         dag.is_subdag = False
@@ -4307,7 +4310,7 @@ class DAG(BaseDag, LoggingMixin):
         if not orm_dag:
             orm_dag = DagModel(dag_id=self.dag_id)
             self.log.info("Creating ORM DAG for %s", self.dag_id)
-        orm_dag.fileloc = self.fileloc
+        orm_dag.fileloc = self.full_filepath
         orm_dag.is_subdag = self.is_subdag
         orm_dag.owners = owner
         orm_dag.is_active = True
