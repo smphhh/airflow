@@ -32,7 +32,7 @@ import airflow
 from airflow import models, version, LoggingMixin
 from airflow.configuration import conf
 from airflow.models.connection import Connection
-from airflow.settings import Session
+from airflow.settings import Session, STORE_SERIALIZED_DAGS
 
 from airflow.www.blueprints import routes
 from airflow.logging_config import configure_logging
@@ -87,15 +87,17 @@ def create_app(config=None, testing=False):
     with app.app_context():
         from airflow.www import views
 
+        dagbag = models.DagBag(settings.DAGS_FOLDER, store_serialized_dags=STORE_SERIALIZED_DAGS)
+
         admin = Admin(
             app, name='Airflow',
             static_url_path='/admin',
-            index_view=views.HomeView(endpoint='', url='/admin', name="DAGs"),
+            index_view=views.HomeView(dagbag=dagbag, endpoint='', url='/admin', name="DAGs"),
             template_mode='bootstrap3',
         )
         av = admin.add_view
         vs = views
-        av(vs.Airflow(name='DAGs', category='DAGs'))
+        av(vs.Airflow(dagbag=dagbag, name='DAGs', category='DAGs'))
 
         if not conf.getboolean('core', 'secure_mode'):
             av(vs.QueryView(name='Ad Hoc Query', category="Data Profiling"))
@@ -108,7 +110,7 @@ def create_app(config=None, testing=False):
             models.SlaMiss,
             Session, name="SLA Misses", category="Browse"))
         av(vs.TaskInstanceModelView(models.TaskInstance,
-            Session, name="Task Instances", category="Browse"))
+            Session, dagbag=dagbag, name="Task Instances", category="Browse"))
         av(vs.LogModelView(
             models.Log, Session, name="Logs", category="Browse"))
         av(vs.JobModelView(
