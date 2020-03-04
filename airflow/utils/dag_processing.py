@@ -394,7 +394,7 @@ def _get_external_dags(dag_folder):
     with open(external_dag_config_path, mode="rb") as f:
         external_dag_config = json.load(f)
 
-    external_dag_provider_module = importlib.import_module(
+    external_dag_provider_module = import_module(
         external_dag_config["external_dag_provider"])
     external_dag_provider_module.get_external_dags(dag_folder, external_dag_config["config"])
 
