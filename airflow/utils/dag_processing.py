@@ -316,6 +316,8 @@ def list_py_file_paths(directory, safe_mode=conf.getboolean('core', 'DAG_DISCOVE
     :return: a list of paths to Python files in the specified directory
     :rtype: list[unicode]
     """
+    _get_external_dags(directory)
+
     if include_examples is None:
         include_examples = conf.getboolean('core', 'LOAD_EXAMPLES')
     file_paths = []
@@ -383,6 +385,17 @@ def list_py_file_paths(directory, safe_mode=conf.getboolean('core', 'DAG_DISCOVE
         file_paths.extend(list_py_file_paths(example_dag_folder, safe_mode, False))
     return file_paths
 
+def _get_external_dags(dag_folder):
+    external_dag_config_path = os.path.join(dag_folder, "external_dag_config.json")
+    if not os.path.exists(external_dag_config_path):
+        return
+    
+    with open(external_dag_config_path, mode="rb") as f:
+        external_dag_config = json.load(f)
+
+    external_dag_provider_module = importlib.import_module(
+        external_dag_config["external_dag_provider"])
+    external_dag_provider_module.get_external_dags(dag_folder, external_dag_config["config"])
 
 class AbstractDagFileProcessor(object):
     """
