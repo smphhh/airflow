@@ -1490,7 +1490,7 @@ class DAG(BaseDag, LoggingMixin):
             orm_dag.root_dag_id = self.parent_dag.dag_id
         else:
             orm_dag.is_subdag = False
-            orm_dag.fileloc = self.fileloc
+            orm_dag.fileloc = self.full_filepath
         orm_dag.owners = owner
         orm_dag.is_active = True
         orm_dag.last_scheduler_run = sync_time

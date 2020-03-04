@@ -284,10 +284,16 @@ class DagBag(BaseDagBag, LoggingMixin):
 
         for m in mods:
             for dag in list(m.__dict__.values()):
+                if isinstance(dag, LazyDAG):
+                    is_lazydag = True
+                    dag = dag.get_dag()
+                else:
+                    is_lazydag = False
+
                 if isinstance(dag, DAG):
                     if not dag.full_filepath:
                         dag.full_filepath = filepath
-                        if dag.fileloc != filepath and not is_zipfile:
+                        if dag.fileloc != filepath and not (is_zipfile or is_lazydag):
                             dag.fileloc = filepath
                     try:
                         dag.is_subdag = False
@@ -485,3 +491,10 @@ class DagBag(BaseDagBag, LoggingMixin):
             task_num=sum([o.task_num for o in stats]),
             table=pprinttable(stats),
         )
+
+class LazyDAG(object):
+    def __init__(self, dag_factory):
+        self._dag_factory = dag_factory
+
+    def get_dag(self):
+        return self._dag_factory()
