@@ -380,10 +380,13 @@ def get_date_time_num_runs_dag_runs_form_data(request, session, dag):
 
 
 class AirflowViewMixin(object):
+    def __init__(self, **kwargs):
+        self.dagbag = kwargs.pop("dagbag", None)
+        super(AirflowViewMixin, self).__init__(**kwargs)
+
     def render(self, template, **kwargs):
         kwargs['scheduler_job'] = lazy_object_proxy.Proxy(jobs.SchedulerJob.most_recent_job)
         kwargs['macros'] = airflow.macros
-        self.dagbag = kwargs.pop("dagbag", None)
         return super(AirflowViewMixin, self).render(template, **kwargs)
 
 
