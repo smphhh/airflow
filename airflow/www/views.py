@@ -879,7 +879,7 @@ class Airflow(AirflowViewMixin, BaseView):
 
         try:
             if ti is not None:
-                dag = dagbag.get_dag(dag_id)
+                dag = self.dagbag.get_dag(dag_id)
                 ti.task = dag.get_task(ti.task_id)
             if response_format == 'json':
                 logs, metadata = _get_logs_with_metadata(try_number, metadata)
@@ -1353,7 +1353,7 @@ class Airflow(AirflowViewMixin, BaseView):
             return redirect(origin)
 
         execution_date = pendulum.parse(execution_date)
-        dag = dagbag.get_dag(dag_id)
+        dag = self.dagbag.get_dag(dag_id)
 
         if not dag:
             flash('Cannot find DAG: {}'.format(dag_id), 'error')
@@ -2859,7 +2859,7 @@ class DagRunModelView(ModelViewOnly):
                 dirty_ids.append(dr.dag_id)
                 count += 1
                 altered_tis += \
-                    set_dag_run_state_to_failed(dagbag.get_dag(dr.dag_id),
+                    set_dag_run_state_to_failed(self.dagbag.get_dag(dr.dag_id),
                                                 dr.execution_date,
                                                 commit=True,
                                                 session=session)
@@ -2885,7 +2885,7 @@ class DagRunModelView(ModelViewOnly):
                 dirty_ids.append(dr.dag_id)
                 count += 1
                 altered_tis += \
-                    set_dag_run_state_to_success(dagbag.get_dag(dr.dag_id),
+                    set_dag_run_state_to_success(self.dagbag.get_dag(dr.dag_id),
                                                  dr.execution_date,
                                                  commit=True,
                                                  session=session)
@@ -2904,19 +2904,19 @@ class DagRunModelView(ModelViewOnly):
         altered_tis = []
         if dagrun.state == State.SUCCESS:
             altered_tis = set_dag_run_state_to_success(
-                dagbag.get_dag(dagrun.dag_id),
+                self.dagbag.get_dag(dagrun.dag_id),
                 dagrun.execution_date,
                 commit=True,
                 session=session)
         elif dagrun.state == State.FAILED:
             altered_tis = set_dag_run_state_to_failed(
-                dagbag.get_dag(dagrun.dag_id),
+                self.dagbag.get_dag(dagrun.dag_id),
                 dagrun.execution_date,
                 commit=True,
                 session=session)
         elif dagrun.state == State.RUNNING:
             altered_tis = set_dag_run_state_to_running(
-                dagbag.get_dag(dagrun.dag_id),
+                self.dagbag.get_dag(dagrun.dag_id),
                 dagrun.execution_date,
                 commit=True,
                 session=session)

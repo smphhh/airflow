@@ -148,7 +148,7 @@ def create_app(config=None, testing=False):
         av(vs.VersionView(name='Version', category="About"))
 
         av(vs.DagRunModelView(
-            models.DagRun, Session, name="DAG Runs", category="Browse"))
+            models.DagRun, Session, dagbag=dagbag, name="DAG Runs", category="Browse"))
         av(vs.DagModelView(models.DagModel, Session, name=None))
         # Hack to not add this view to the menu
         admin._menu = admin._menu[:-1]
