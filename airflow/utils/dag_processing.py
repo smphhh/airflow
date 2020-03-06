@@ -53,6 +53,7 @@ from airflow.settings import Stats
 from airflow.models import errors
 from airflow.settings import STORE_SERIALIZED_DAGS
 from airflow.utils import timezone
+from airflow.utils.external_dags import get_external_dag_paths
 from airflow.utils.helpers import reap_process_group
 from airflow.utils.db import provide_session
 from airflow.utils.log.logging_mixin import LoggingMixin
@@ -319,14 +320,12 @@ def list_py_file_paths(directory, safe_mode=conf.getboolean('core', 'DAG_DISCOVE
     """
     if include_examples is None:
         include_examples = conf.getboolean('core', 'LOAD_EXAMPLES')
-    file_paths = []
+    file_paths = get_external_dag_paths(directory)
     if directory is None:
         return []
     elif os.path.isfile(directory):
         return [directory]
     elif os.path.isdir(directory):
-        file_paths = _get_external_dag_paths(directory)
-
         patterns_by_dir = {}
         for root, dirs, files in os.walk(directory, followlinks=True):
             patterns = patterns_by_dir.get(root, [])
@@ -385,20 +384,6 @@ def list_py_file_paths(directory, safe_mode=conf.getboolean('core', 'DAG_DISCOVE
         example_dag_folder = airflow.example_dags.__path__[0]
         file_paths.extend(list_py_file_paths(example_dag_folder, safe_mode, False))
     return file_paths
-
-def _get_external_dag_paths(dag_dir_path):
-    external_dag_config_path = os.path.join(dag_dir_path, "external_dag_config.json")
-    if os.path.exists(external_dag_config_path):    
-        with open(external_dag_config_path, mode="rb") as f:
-            external_dag_config = json.load(f)
-
-        external_dag_provider_module = import_module(
-            external_dag_config["external_dag_provider"])
-        return external_dag_provider_module.get_external_dag_paths(
-            dag_dir_path, external_dag_config["config"])
-
-    else:
-        return []
 
 class AbstractDagFileProcessor(object):
     """
