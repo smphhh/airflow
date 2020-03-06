@@ -194,6 +194,8 @@ class DagBag(BaseDagBag, LoggingMixin):
 
         found_dags = []
 
+        _get_external_dag(filepath)
+
         # if the source file no longer exists in the DB or in the filesystem,
         # return an empty list
         # todo: raise exception?
@@ -498,3 +500,26 @@ class LazyDAG(object):
 
     def get_dag(self):
         return self._dag_factory()
+
+def _get_external_dag(dag_file_path):
+    if dag_file_path is None or os.path.exists(dag_file_path):
+        return
+
+    for dag_dir_path in _yield_path_prefixes(dag_file_path):
+        external_dag_config_path = os.path.join(dag_dir_path, "external_dag_config.json")
+        if os.path.exists(external_dag_config_path):    
+            with open(external_dag_config_path, mode="rb") as f:
+                external_dag_config = json.load(f)
+
+            external_dag_provider_module = importlib.import_module(
+                external_dag_config["external_dag_provider"])
+            external_dag_provider_module.get_external_dag(
+                dag_dir_path, dag_file_path, external_dag_config["config"])
+
+            return
+
+def _yield_path_prefixes(path):
+    path = os.path.normpath(path)
+    while len(path) > 1:
+        yield path
+        path, _ = os.path.split(path)

@@ -317,8 +317,6 @@ def list_py_file_paths(directory, safe_mode=conf.getboolean('core', 'DAG_DISCOVE
     :return: a list of paths to Python files in the specified directory
     :rtype: list[unicode]
     """
-    _get_external_dags(directory)
-
     if include_examples is None:
         include_examples = conf.getboolean('core', 'LOAD_EXAMPLES')
     file_paths = []
@@ -327,6 +325,8 @@ def list_py_file_paths(directory, safe_mode=conf.getboolean('core', 'DAG_DISCOVE
     elif os.path.isfile(directory):
         return [directory]
     elif os.path.isdir(directory):
+        file_paths = _get_external_dag_paths(directory)
+
         patterns_by_dir = {}
         for root, dirs, files in os.walk(directory, followlinks=True):
             patterns = patterns_by_dir.get(root, [])
@@ -386,24 +386,19 @@ def list_py_file_paths(directory, safe_mode=conf.getboolean('core', 'DAG_DISCOVE
         file_paths.extend(list_py_file_paths(example_dag_folder, safe_mode, False))
     return file_paths
 
-def _get_external_dags(dag_dir_or_file_path):
-    for path in _yield_path_prefixes(dag_dir_or_file_path):
-        external_dag_config_path = os.path.join(path, "external_dag_config.json")
-        if os.path.exists(external_dag_config_path):    
-            with open(external_dag_config_path, mode="rb") as f:
-                external_dag_config = json.load(f)
+def _get_external_dag_paths(dag_dir_path):
+    external_dag_config_path = os.path.join(dag_dir_path, "external_dag_config.json")
+    if os.path.exists(external_dag_config_path):    
+        with open(external_dag_config_path, mode="rb") as f:
+            external_dag_config = json.load(f)
 
-            external_dag_provider_module = import_module(
-                external_dag_config["external_dag_provider"])
-            external_dag_provider_module.get_external_dags(path, external_dag_config["config"])
+        external_dag_provider_module = import_module(
+            external_dag_config["external_dag_provider"])
+        return external_dag_provider_module.get_external_dag_paths(
+            dag_dir_path, external_dag_config["config"])
 
-            return
-
-def _yield_path_prefixes(path):
-    path = os.path.normpath(path)
-    while len(path) > 1:
-        yield path
-        path, _ = os.path.split(path)
+    else:
+        return []
 
 class AbstractDagFileProcessor(object):
     """
