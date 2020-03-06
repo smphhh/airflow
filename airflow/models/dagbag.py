@@ -23,6 +23,7 @@ from __future__ import unicode_literals
 import hashlib
 import imp
 import importlib
+import json
 import os
 import sys
 import textwrap
