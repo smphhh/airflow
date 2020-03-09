@@ -27,7 +27,7 @@ def get_external_dag(dag_file_path):
     """
     Download all external DAG files for the DAG import file
     """
-    if dag_file_path is None or os.path.exists(dag_file_path):
+    if dag_file_path is None:
         return
 
     external_dag_config_path = _find_external_dag_config(dag_file_path)
