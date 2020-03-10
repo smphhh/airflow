@@ -34,6 +34,7 @@ from tempfile import mkdtemp
 from contextlib import contextmanager
 
 from airflow.configuration import conf
+from airflow.utils.external_dags import sync_external_dag
 
 log = logging.getLogger(__name__)
 
@@ -95,6 +96,9 @@ def open_maybe_zipped(fileloc, mode='r'):
 
     :return: a file object, as in `open`, or as in `ZipFile.open`.
     """
+
+    sync_external_dag(f)
+
     _, archive, filename = ZIP_REGEX.search(fileloc).groups()
     if archive and zipfile.is_zipfile(archive):
         return zipfile.ZipFile(archive, mode=mode).open(filename)
