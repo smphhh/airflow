@@ -52,6 +52,7 @@ from airflow.settings import Stats
 from airflow.models import errors
 from airflow.settings import STORE_SERIALIZED_DAGS
 from airflow.utils import timezone
+from airflow.utils.external_dags import get_external_dag_paths
 from airflow.utils.helpers import reap_process_group
 from airflow.utils.db import provide_session
 from airflow.utils.log.logging_mixin import LoggingMixin
@@ -318,7 +319,7 @@ def list_py_file_paths(directory, safe_mode=conf.getboolean('core', 'DAG_DISCOVE
     """
     if include_examples is None:
         include_examples = conf.getboolean('core', 'LOAD_EXAMPLES')
-    file_paths = []
+    file_paths = get_external_dag_paths(directory)
     if directory is None:
         return []
     elif os.path.isfile(directory):

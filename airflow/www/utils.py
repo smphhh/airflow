@@ -45,6 +45,7 @@ from airflow import models, settings
 from airflow.configuration import conf
 from airflow.utils.db import create_session
 from airflow.utils import timezone
+from airflow.utils.external_dags import sync_external_dag
 from airflow.utils.json import AirflowJsonEncoder
 
 try:
@@ -396,6 +397,8 @@ def open_maybe_zipped(f, mode='r'):
 
     :return: a file object, as in `open`, or as in `ZipFile.open`.
     """
+
+    sync_external_dag(f)
 
     _, archive, filename = ZIP_REGEX.search(f).groups()
     if archive and zipfile.is_zipfile(archive):
