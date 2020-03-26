@@ -176,7 +176,7 @@ class GoogleCloudStorageToBigQueryOperator(BaseOperator):
                  external_table=False,
                  time_partitioning=None,
                  cluster_fields=None,
-                 autodetect=True,
+                 autodetect=False,
                  encryption_configuration=None,
                  *args, **kwargs):
 
@@ -232,9 +232,6 @@ class GoogleCloudStorageToBigQueryOperator(BaseOperator):
                 schema_fields = json.loads(gcs_hook.download(
                     self.bucket,
                     self.schema_object).decode("utf-8"))
-            elif self.schema_object is None and self.autodetect is False:
-                raise ValueError('At least one of `schema_fields`, `schema_object`, '
-                                 'or `autodetect` must be passed.')
             else:
                 schema_fields = None
 

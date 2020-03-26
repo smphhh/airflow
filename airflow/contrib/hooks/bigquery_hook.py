@@ -1175,10 +1175,6 @@ class BigQueryBaseCursor(LoggingMixin):
         # Refer to this link for more details:
         #   https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs#configuration.query.tableDefinitions.(key).sourceFormat
 
-        if schema_fields is None and not autodetect:
-            raise ValueError(
-                'You must either pass a schema or autodetect=True.')
-
         if src_fmt_configs is None:
             src_fmt_configs = {}
 
@@ -1213,7 +1209,6 @@ class BigQueryBaseCursor(LoggingMixin):
 
         configuration = {
             'load': {
-                'autodetect': autodetect,
                 'createDisposition': create_disposition,
                 'destinationTable': {
                     'projectId': destination_project,
@@ -1284,7 +1279,8 @@ class BigQueryBaseCursor(LoggingMixin):
                                           'ignoreUnknownValues': ignore_unknown_values,
                                           'quote': quote_character,
                                           'allowQuotedNewlines': allow_quoted_newlines,
-                                          'encoding': encoding}
+                                          'encoding': encoding,
+                                          'autodetect': autodetect,}
 
         src_fmt_configs = _validate_src_fmt_configs(source_format, src_fmt_configs, valid_configs,
                                                     backward_compatibility_configs)
