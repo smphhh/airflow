@@ -159,7 +159,13 @@ class LocalTaskJob(BaseJob):
                 raise AirflowException("PID of job runner does not match")
         elif (
                 self.task_runner.return_code() is None and
-                hasattr(self.task_runner, 'process')
+                # Make sure the task state hasn't just been changed by the task runner process
+                # but the process hasn't yet had time to shut down
+                not (
+                    ti.end_date is not None
+                    and (timezone.utcnow() - ti.end_date).total_seconds() < 2 * self.heartrate
+                )
+                and hasattr(self.task_runner, 'process')
         ):
             self.log.warning(
                 "State of this instance has been externally set to %s. "
